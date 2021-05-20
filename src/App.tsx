@@ -1,17 +1,30 @@
-import logo from './logo.svg';
+// App.tsx
+import React, { useEffect, useState } from 'react';
 import './App.css';
-import { withAuthenticator, AmplifySignOut } from '@aws-amplify/ui-react'
+import {AmplifyAuthenticator } from '@aws-amplify/ui-react';
+import { AuthState, onAuthUIStateChange} from "@aws-amplify/ui-components";
+import NavBar from './layout/NavBar';
+import DemoContent from './layout/DemoContent';
 
-function App() {
-  return (
-    <div className="App">
-      <header>
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1>Hello Amplify!!</h1>
-      </header>
-      <AmplifySignOut />
+const App = () => {
+  const [authState, setAuthState] = useState<AuthState>();
+  const [user, setUser] = useState<any>(); 
+
+  useEffect(() => {
+    return onAuthUIStateChange((nextAuthState, authData) => {
+      setAuthState(nextAuthState);
+      setUser(authData);
+    });
+  }, []);
+
+  return authState === AuthState.SignedIn && user ? (
+    <div>
+        <NavBar username={user.username}/>
+        <DemoContent />
     </div>
+  ) : (
+      <AmplifyAuthenticator />
   );
 }
 
-export default withAuthenticator(App);
+export default App;
